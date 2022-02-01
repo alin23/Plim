@@ -7,6 +7,7 @@ import markdown2
 
 from . import errors
 from .util import StringIO, MAXSIZE, joined, space_separated, u
+from .extensions import md_to_html
 from .extensions import rst_to_html
 from .extensions import coffee_to_js
 from .extensions import scss_to_css
@@ -72,7 +73,6 @@ CSS_CLASS_SHORTCUT_TERMINATORS = (
     CSS_CLASS_SHORTCUT_DELIMITER,
     WHITESPACE,
     OPEN_BRACE,
-    INLINE_TAG_SEPARATOR
 )
 
 ATTRIBUTE_TERMINATORS = (
@@ -1607,8 +1607,8 @@ def compile_plim_source(source, syntax, strip=True):
 EMPTY_TAGS = {'meta', 'img', 'link', 'input', 'area', 'base', 'col', 'br', 'hr'}
 
 MARKUP_LANGUAGES = {
-    'md': markdown2.markdown,
-    'markdown': markdown2.markdown,
+    'md': md_to_html,
+    'markdown': md_to_html,
     'rst': rst_to_html,
     'rest': rst_to_html,
     'coffee': coffee_to_js,
