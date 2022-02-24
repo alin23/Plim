@@ -30,4 +30,4 @@ def stylus_to_css(source):
 
 
 def md_to_html(source):
-    return markdown2.markdown(source, use_file_vars=True, extras=["header-ids"])
+    return markdown2.markdown(source, use_file_vars=True, extras=["header-ids", "fenced-code-blocks"])
