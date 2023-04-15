@@ -1,23 +1,21 @@
 import re
+from typing import Sequence, Any
+
+from pyrsistent import v, pvector
 
 from . import lexer as l
-from .util import PY3K
 
-
-if PY3K:
-    PARSE_IMPLICIT_LITERAL_RE = re.compile(
-        # Order matters
-        '(?P<line>(?:'
-            '\$?\{|\(|\[|&.+;|[0-9]+|'
-            '(?:'
-                '[^\u0021-\u007E]'  # not ASCII 33 - 126
-                '|'                 # or
-                '[A-Z]'             # uppercase latin letters (ASCII 65 - 90)
-            ')'                     # It is possible because TAG_RE can match only lowercase tag names
-        ').*)\s*'
-    )
-else:
-    from .unportable import PARSE_IMPLICIT_LITERAL_RE
+PARSE_IMPLICIT_LITERAL_RE = re.compile(
+    # Order matters
+    '(?P<line>(?:'
+        '\$?\{|\(|\[|&.+;|[0-9]+|'
+        '(?:'
+            '[^\u0021-\u007E]'  # not ASCII 33 - 126
+            '|'                 # or
+            '[A-Z]'             # uppercase latin letters (ASCII 65 - 90)
+        ')'                     # It is possible because TAG_RE can match only lowercase tag names
+    ').*)\s*'
+)
 
 
 class BaseSyntax(object):
@@ -56,13 +54,15 @@ class BaseSyntax(object):
     PARSE_ELIF_ELSE_RE = re.compile('-\s*(?P<control>elif|else)(?P<expr>.*)')
     PARSE_EXCEPT_ELSE_FINALLY_RE = re.compile('-\s*(?P<control>except|else|finally)(?P<expr>.*)')
 
-    def __init__(self, custom_parsers=None):
+    def __init__(self, custom_parsers: Sequence[Any] = v()):
         """
         :param custom_parsers: a list of 2-tuples of (parser_regex, parser_callable) or None
         :type custom_parsers: list or None
         """
-        if custom_parsers is None:
-            custom_parsers = []
+        if not custom_parsers:
+            custom_parsers = v()
+        else:
+            custom_parsers = pvector(custom_parsers)
 
         # We initialize standard parsers here rather than in a class' scope, because
         # we would like to be able to discard parsers in some syntax implementations by
@@ -88,16 +88,16 @@ class BaseSyntax(object):
             (self.PARSE_EARLY_RETURN_RE, l.parse_early_return),
             (self.PARSE_EXTENSION_LANGUAGES_RE, l.parse_markup_languages)
         )
-        custom_parsers.extend(standard_parsers)
+        custom_parsers = custom_parsers.extend(standard_parsers)
         # discard parsers with None pattern
         self.parsers = tuple([p for p in custom_parsers if p[0]])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return 'Base Syntax'
 
 
 class Mako(BaseSyntax):
-    def __str__(self):
+    def __str__(self) -> str:
         return 'Mako Syntax'
 
 
@@ -109,8 +109,8 @@ class Django(BaseSyntax):
     STATEMENT_END_START_SEQUENCE = STATEMENT_START_START_SEQUENCE
     STATEMENT_END_END_SEQUENCE = STATEMENT_START_END_SEQUENCE
 
-    PARSE_MAKO_ONE_LINERS_RE = None
-    PARSE_MAKO_TEXT_RE = None
+    PARSE_MAKO_ONE_LINERS_RE = None  # type: ignore
+    PARSE_MAKO_TEXT_RE = None  # type: ignore
 
     def __str__(self):
         return 'Django Syntax'
